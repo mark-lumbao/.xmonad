@@ -24,8 +24,8 @@ myTerminal = "alacritty"
 myBar = "xmobar ~/.xmonad/.xmobarrc"
 myTray = "trayer"
 myTrayOptions =
-  "--edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 7 \
-  \--transparent true --tint 0x928374 --alpha 0 --height 23 --iconspacing 2 &"
+  "--edge bottom --align right --SetDockType true --SetPartialStrut true \
+  \--expand true --transparent true --tint 0x333333 --alpha 0 &"
 myBrowser = "brave"
 myModMask = mod4Mask -- Win key or Super_L
 myBorderWidth = 4
@@ -56,6 +56,8 @@ myManageHook =
 myKeys =
   [ ("M-b" , spawn myBrowser)
   , ("M1-b", spawn $ myBrowser ++ " --incognito")
+  , ("M1-s", spawn "slack")
+  , ("M1-e", spawn "element-desktop")
   , ("M-t" , namedScratchpadAction scratchpads "htop")
   , ("M-p", namedScratchpadAction scratchpads "pulsemixer")
   , ( "M1-d"
@@ -73,6 +75,7 @@ myKeys =
       "if type xmonad; then xmonad --recompile && xmonad --restart; else xmessage xmonad not in \\$PATH: \"$PATH\"; fi"
     ) -- %! Restart xmonad
     -- volume keys
+  , ("<Print>"        , spawn "flameshot gui")
   , ("<XF86AudioMute>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
   , ( "<XF86AudioLowerVolume>"
     , spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%"
@@ -90,7 +93,6 @@ myStartup = do
   spawnOnce "nm-applet"
   spawnOnce "pamac-tray"
   spawnOnce "xfce4-power-manager"
-  spawnOnce "setcursor"
   spawnOnce "picom --experimental-backends --corner-radius 8 -o 0.0 -b"
   spawnOnce "~/.fehbg"
 
@@ -115,7 +117,7 @@ myLayout = toggledTiled ||| toggledMirror
   nmaster       = 1
 
   -- Default proportion of screen occupied by master pane
-  ratio         = 1 / 2
+  ratio         = 2 / 3
 
   -- Percent of screen to increment by when resizing panes
   delta         = 3 / 100
