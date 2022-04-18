@@ -24,8 +24,8 @@ myTerminal = "alacritty"
 myBar = "xmobar ~/.xmonad/.xmobarrc"
 myTray = "trayer"
 myTrayOptions =
-  "--edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 5 \
-  \--transparent true --tint 0x928374 --alpha 0 --height 21.5 --iconspacing 5 &"
+  "--edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 7 \
+  \--transparent true --tint 0x928374 --alpha 0 --height 23 --iconspacing 2 &"
 myBrowser = "brave"
 myModMask = mod4Mask -- Win key or Super_L
 myBorderWidth = 4
