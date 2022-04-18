@@ -1,6 +1,8 @@
 import           XMonad
 import           XMonad.Hooks.DynamicLog
-import           XMonad.Hooks.EwmhDesktops
+import           XMonad.Hooks.EwmhDesktops      ( ewmh
+                                                , fullscreenEventHook
+                                                )
 import           XMonad.Hooks.ManageHelpers     ( doCenterFloat
                                                 , doFullFloat
                                                 , isFullscreen
@@ -12,6 +14,7 @@ import           XMonad.Util.SpawnOnce
 
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spacing
+import           XMonad.Layout.ToggleLayouts   as T
 
 import           GHC.IO.Exception               ( ExitCode(ExitSuccess) )
 import           System.Exit                    ( exitSuccess )
@@ -38,7 +41,8 @@ scratchpads = [tScratch "htop", tScratch "pulsemixer"]
 
 -- Custom PP, configure it as you like. It determines what is being written to the bar.
 myPP :: PP
-myPP = xmobarPP { ppCurrent = xmobarColor "#429942" "" . wrap "[" "]" }
+myPP =
+  xmobarPP { ppCurrent = xmobarColor myFocusedBorderColor "" . wrap "[" "]" }
 
 myManageHook =
   composeAll
@@ -62,8 +66,8 @@ myKeys =
     , spawn
       "dmenu_run -nf '#fbf1c7' -sf '#282828' -sb '#98971a' -fn 'DejaVu Sans Mono:size=10'"
     )
-  , ("M-<Escape>", io exitSuccess)
-  , ("M-q"       , kill)
+  , ("M-q", kill)
+  , ("M-f", sendMessage $ T.Toggle "Full")
   , ( "M-r"
     , spawn
       "if type xmonad; then xmonad --recompile && xmonad --restart; else xmessage xmonad not in \\$PATH: \"$PATH\"; fi"
@@ -79,7 +83,7 @@ myKeys =
   ]
 
 -- Autostarts startup :: X ()
-startup = do
+myStartup = do
   spawn ("killall " ++ myTray)
   spawn ("sleep 2 && " ++ myTray ++ " " ++ myTrayOptions)
   spawnOnce "pasystray"
@@ -94,19 +98,27 @@ startup = do
 toggleStrutsKey XConfig { XMonad.modMask = modMask } = (modMask, xK_m)
 
 -- Layout
-layout = tiled ||| Mirror tiled ||| noBorders Full
+myLayout = toggledTiled ||| toggledMirror
  where
      -- default tiling algorithm partitions the screen into two panes
-  tiled   = smartSpacingWithEdge 4 $ smartBorders $ Tall nmaster delta ratio
+  tiled = smartSpacingWithEdge 4 $ smartBorders $ Tall nmaster delta ratio
+
+  full          = noBorders Full
+
+  mirror        = Mirror tiled
+
+  toggledTiled  = T.toggleLayouts full tiled
+
+  toggledMirror = T.toggleLayouts full mirror
 
   -- The default number of windows in the master pane
-  nmaster = 1
+  nmaster       = 1
 
   -- Default proportion of screen occupied by master pane
-  ratio   = 1 / 2
+  ratio         = 1 / 2
 
   -- Percent of screen to increment by when resizing panes
-  delta   = 3 / 100
+  delta         = 3 / 100
 
 
 -- Main configuration
@@ -118,8 +130,8 @@ myConfig =
       , normalBorderColor  = myNormalBorderColor
       , focusedBorderColor = myFocusedBorderColor
       , handleEventHook    = fullscreenEventHook
-      , startupHook        = startup
-      , layoutHook         = layout
+      , startupHook        = myStartup
+      , layoutHook         = myLayout
       }
     `additionalKeysP` myKeys
 

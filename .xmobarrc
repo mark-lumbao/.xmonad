@@ -40,18 +40,16 @@ Config {
 
         -- weather monitor
         [ Run Weather "RPLL" [ "--template"
-                             , "<fc=#83a598> <stationState></fc><skyCondition> <fc=#83a598><tempC></fc>°C"
+                             , "<fc=#83a598> <stationState><skyCondition> <tempC>°C</fc>"
                              ] 36000
 
         -- StdinReader
         , Run StdinReader
 
         -- cpu activity monitor
-        , Run MultiCpu       [ "--template" , "<fc=#b16286></fc> <total0>% <total1>% <total2>% <total3>% <total4>% <total5>% <total6>% <total7>% <total8>% <total9>% <total10>% <total11>%"
+        , Run MultiCpu       [ "--template" , "<fc=#b16286> <total0>% <total1>% <total2>% <total3>% <total4>% <total5>% <total6>% <total7>% <total8>% <total9>% <total10>% <total11>%</fc>"
                              , "--Low"      , "50"         -- units: %
                              , "--High"     , "85"         -- units: %
-                             , "--low"      , "#689d6a"
-                             , "--normal"   , "#fe8019"
                              , "--high"     , "#fb4934"
                              ] 10
 
@@ -65,11 +63,9 @@ Config {
                              ] 50
 
         -- memory usage monitor
-        , Run Memory         [ "--template" ,"<fc=#458588></fc> <usedratio>%"
+        , Run Memory         [ "--template" ,"<fc=#458588> <usedratio>%</fc>"
                              , "--Low"      , "20"        -- units: %
                              , "--High"     , "90"        -- units: %
-                             , "--low"      , "#689d6a"
-                             , "--normal"   , "#fe8019"
                              , "--high"     , "#fb4934"
                              ] 10
 
