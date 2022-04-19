@@ -12,9 +12,12 @@ import           XMonad.Util.EZConfig
 import           XMonad.Util.NamedScratchpad
 import           XMonad.Util.SpawnOnce
 
+import           XMonad.Layout.CenteredMaster
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spacing
 import           XMonad.Layout.ToggleLayouts   as T
+
+import qualified XMonad.StackSet               as W
 
 import           GHC.IO.Exception               ( ExitCode(ExitSuccess) )
 import           System.Exit                    ( exitSuccess )
@@ -31,6 +34,10 @@ myModMask = mod4Mask -- Win key or Super_L
 myBorderWidth = 4
 myNormalBorderColor = "#1d2021"
 myFocusedBorderColor = "#98971a"
+myAppLauncher =
+  "rofi -theme gruvbox-dark-hard -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 12'"
+myMenu =
+  "dmenu_run -nf '#fbf1c7' -sf '#282828' -sb '#98971a' -fn 'DejaVu Sans Mono:size=10'"
 
 -- Scratchpads
 scratchpads :: [NamedScratchpad]
@@ -54,28 +61,28 @@ myManageHook =
 
 -- Keybinds
 myKeys =
-  [ ("M-b" , spawn myBrowser)
+  -- App shortcuts
+  [ ("M-b"        , spawn myBrowser)
   , ("M1-b", spawn $ myBrowser ++ " --incognito")
-  , ("M1-s", spawn "slack")
-  , ("M1-e", spawn "element-desktop")
-  , ("M-t" , namedScratchpadAction scratchpads "htop")
-  , ("M-p", namedScratchpadAction scratchpads "pulsemixer")
-  , ( "M1-d"
-    , spawn
-      "rofi -theme gruvbox-dark-hard -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 12'"
-    )
-  , ( "M-d"
-    , spawn
-      "dmenu_run -nf '#fbf1c7' -sf '#282828' -sb '#98971a' -fn 'DejaVu Sans Mono:size=10'"
-    )
-  , ("M-q", kill)
-  , ("M-f", sendMessage $ T.Toggle "Full")
+  , ("M1-s"       , spawn "slack")
+  , ("M1-e"       , spawn "element-desktop")
+  , ("M-<Return>" , spawn myTerminal)
+  , ("<Print>"    , spawn "flameshot gui")
+  -- Layout and Window controls
+  , ("M1-<Return>", windows W.swapMaster)
+  , ("M-f"        , sendMessage T.ToggleLayout)
+  , ("M-q"        , kill)
+  , ("M-S-t", namedScratchpadAction scratchpads "htop")
+  , ("M-S-p", namedScratchpadAction scratchpads "pulsemixer")
+  -- Runner shortcuts
+  , ("M1-p"       , spawn myAppLauncher)
+  , ("M-p"        , spawn myMenu)
+  -- Restart xmonad
   , ( "M-r"
     , spawn
       "if type xmonad; then xmonad --recompile && xmonad --restart; else xmessage xmonad not in \\$PATH: \"$PATH\"; fi"
-    ) -- %! Restart xmonad
-    -- volume keys
-  , ("<Print>"        , spawn "flameshot gui")
+    )
+  -- Audio Controls
   , ("<XF86AudioMute>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
   , ( "<XF86AudioLowerVolume>"
     , spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%"
@@ -83,6 +90,10 @@ myKeys =
   , ( "<XF86AudioRaiseVolume>"
     , spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%"
     )
+  -- Brightness controls
+  , ("<F1>", spawn "brightnessctl s 1%")
+  , ("<F2>", spawn "brightnessctl s 10%-")
+  , ("<F3>", spawn "brightnessctl s 10%+")
   ]
 
 -- Autostarts startup :: X ()
@@ -97,10 +108,12 @@ myStartup = do
   spawnOnce "~/.fehbg"
 
 -- Key binding to toggle the gap for the bar.
-toggleStrutsKey XConfig { XMonad.modMask = modMask } = (modMask, xK_m)
+toggleStrutsKey XConfig { XMonad.modMask = modMask } = (mod1Mask, xK_f)
 
 -- Layout
-myLayout = toggledTiled ||| toggledMirror
+myLayout = toggledTiled ||| toggledMirror ||| T.toggleLayouts
+  (topRightMaster tiled)
+  (centerMaster tiled)
  where
      -- default tiling algorithm partitions the screen into two panes
   tiled = smartSpacingWithEdge 4 $ smartBorders $ Tall nmaster delta ratio
