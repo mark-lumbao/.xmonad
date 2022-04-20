@@ -13,7 +13,12 @@ import           XMonad.Util.NamedScratchpad
 import           XMonad.Util.SpawnOnce
 
 import           XMonad.Layout.CenteredMaster
-import           XMonad.Layout.NoBorders
+import           XMonad.Layout.NoBorders        ( noBorders
+                                                , smartBorders
+                                                )
+import           XMonad.Layout.Renamed          ( Rename(Replace)
+                                                , renamed
+                                                )
 import           XMonad.Layout.Spacing
 import           XMonad.Layout.ToggleLayouts   as T
 
@@ -26,25 +31,34 @@ import           System.Exit                    ( exitSuccess )
 myTerminal = "alacritty"
 myBar = "xmobar ~/.xmonad/.xmobarrc"
 myTray = "trayer"
+myBacklitCtl = "brightnessctl"
 myTrayOptions =
   "--edge bottom --align right --SetDockType true --SetPartialStrut true \
-  \--expand true --transparent true --tint 0x333333 --alpha 0 &"
+  \--expand true --transparent true --alpha 0 \
+  \--tint "
+    ++ "0x"
+    ++ tail myNormalBorderColor -- trayer bg color
+    ++ " &"
 myBrowser = "brave"
-myModMask = mod4Mask -- Win key or Super_L
-myBorderWidth = 4
-myNormalBorderColor = "#1d2021"
-myFocusedBorderColor = "#98971a"
 myAppLauncher =
   "rofi -theme gruvbox-dark-hard -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 12'"
 myMenu =
-  "dmenu_run -nf '#fbf1c7' -sf '#282828' -sb '#98971a' -fn 'DejaVu Sans Mono:size=10'"
+  "dmenu_run -nf '#fbf1c7' -sf '"
+    ++ myNormalBorderColor
+    ++ "' -sb '"
+    ++ myFocusedBorderColor
+    ++ "' -fn 'DejaVu Sans Mono:size=10'"
+myModMask = mod4Mask -- Win key or Super_L
+myBorderWidth = 4
+myNormalBorderColor = "#282828"
+myFocusedBorderColor = "#98971a"
 
 -- Scratchpads
 scratchpads :: [NamedScratchpad]
-scratchpads = [tScratch "htop", tScratch "pulsemixer"]
+scratchpads = [pad "htop", pad "pulsemixer"]
  where
-  tCmd app = myTerminal ++ " --class '" ++ app ++ "' -e " ++ app
-  tScratch cmd = NS cmd (tCmd cmd) (resource =? cmd) defaultFloating
+  command pad = myTerminal ++ " --class '" ++ pad ++ "' -e " ++ pad
+  pad name = NS name (command name) (resource =? name) defaultFloating
 
 -- Custom PP, configure it as you like. It determines what is being written to the bar.
 myPP :: PP
@@ -91,9 +105,9 @@ myKeys =
     , spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%"
     )
   -- Brightness controls
-  , ("<F1>", spawn "brightnessctl s 1%")
-  , ("<F2>", spawn "brightnessctl s 10%-")
-  , ("<F3>", spawn "brightnessctl s 10%+")
+  , ("<F1>", spawn $ myBacklitCtl ++ " s 1%")
+  , ("<F2>", spawn $ myBacklitCtl ++ " s 10%-")
+  , ("<F3>", spawn $ myBacklitCtl ++ " s 10%+")
   ]
 
 -- Autostarts startup :: X ()
@@ -111,29 +125,37 @@ myStartup = do
 toggleStrutsKey XConfig { XMonad.modMask = modMask } = (mod1Mask, xK_f)
 
 -- Layout
-myLayout = toggledTiled ||| toggledMirror ||| T.toggleLayouts
-  (topRightMaster tiled)
-  (centerMaster tiled)
+myLayout = toggledTiled ||| toggledMirror ||| toggledCentered
  where
      -- default tiling algorithm partitions the screen into two panes
-  tiled = smartSpacingWithEdge 4 $ smartBorders $ Tall nmaster delta ratio
+  tiled = alias "Tall" $ smartSpacingWithEdge 4 $ smartBorders $ Tall nmaster
+                                                                      delta
+                                                                      ratio
 
-  full          = noBorders Full
+  full            = noBorders Full
 
-  mirror        = Mirror tiled
+  mirror          = alias "Mirrored" $ Mirror tiled
 
-  toggledTiled  = T.toggleLayouts full tiled
+  -- Tiled layouts with toggles for Full mode
+  toggledTiled    = T.toggleLayouts full tiled
 
-  toggledMirror = T.toggleLayouts full mirror
+  toggledMirror   = T.toggleLayouts full mirror
+
+  -- Centered master layout with toggle for centered or top-right masters
+  toggledCentered = alias "Centered"
+    $ T.toggleLayouts (topRightMaster tiled) (centerMaster tiled)
+
+  -- Function to rename layouts
+  alias a = renamed [Replace a]
 
   -- The default number of windows in the master pane
-  nmaster       = 1
+  nmaster = 1
 
   -- Default proportion of screen occupied by master pane
-  ratio         = 2 / 3
+  ratio   = 2 / 3
 
   -- Percent of screen to increment by when resizing panes
-  delta         = 3 / 100
+  delta   = 3 / 100
 
 
 -- Main configuration
