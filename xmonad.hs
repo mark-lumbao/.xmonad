@@ -41,13 +41,13 @@ myTrayOptions =
     ++ " &"
 myBrowser = "brave"
 myAppLauncher =
-  "rofi -theme gruvbox-dark-hard -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 12'"
+  "rofi -theme gruvbox-dark-hard -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Hasklug Nerd Font 12'"
 myMenu =
   "dmenu_run -nf '#fbf1c7' -sf '"
     ++ myNormalBorderColor
     ++ "' -sb '"
     ++ myFocusedBorderColor
-    ++ "' -fn 'DejaVu Sans Mono:size=10'"
+    ++ "' -fn 'Hasklug Nerd Font:size=10'"
 myModMask = mod4Mask -- Win key or Super_L
 myBorderWidth = 4
 myNormalBorderColor = "#282828"
@@ -55,7 +55,7 @@ myFocusedBorderColor = "#98971a"
 
 -- Scratchpads
 scratchpads :: [NamedScratchpad]
-scratchpads = [pad "htop", pad "pulsemixer"]
+scratchpads = [pad "htop", pad "pulsemixer", pad "ranger"]
  where
   command pad = myTerminal ++ " --class '" ++ pad ++ "' -e " ++ pad
   pad name = NS name (command name) (resource =? name) defaultFloating
@@ -69,6 +69,7 @@ myManageHook =
   composeAll
       [ appName =? "pulsemixer" --> doCenterFloat
       , appName =? "htop" --> doCenterFloat
+      , appName =? "ranger" --> doCenterFloat
       , isFullscreen --> doFullFloat
       ]
     <+> namedScratchpadManageHook scratchpads
@@ -86,6 +87,8 @@ myKeys =
   , ("M1-<Return>", windows W.swapMaster)
   , ("M-f"        , sendMessage T.ToggleLayout)
   , ("M-q"        , kill)
+  -- Scratchpads
+  , ("M-S-e", namedScratchpadAction scratchpads "ranger")
   , ("M-S-t", namedScratchpadAction scratchpads "htop")
   , ("M-S-p", namedScratchpadAction scratchpads "pulsemixer")
   -- Runner shortcuts

@@ -1,7 +1,7 @@
 Config {
 
    -- appearance
-     font =         "xft:Bitstream Vera Sans Mono:size=11:bold:antialias=true,Font Awesome 6 Free Solid:pixelSize=11"
+     font =         "xft:Hasklug Nerd Font:size=11:bold:antialias=true"
    , bgColor =      "#282828"
    , fgColor =      "#ebdbb2"
    , position =     TopW L 100
@@ -12,7 +12,7 @@ Config {
    -- add %battery% in template for laptops
    , sepChar =  "%"   -- delineator between plugin names and straight text
    , alignSep = "}{"  -- separator between left-right alignment
-   , template = " <fc=#fe8019> %whoami%</fc> <fc=#98971a>%StdinReader%</fc>  %multicpu%  %memory% }{ %RPLL%  %date%  %battery%  <fc=#fb4934> %volume%</fc>  %bright% "
+   , template = "  %whoami%  <fc=#98971a>%StdinReader%</fc>  %multicpu%  %memory% }{ %RPLL%  %date%  <fc=#fe8019>%battery%</fc>  <fc=#fb4934> %volume%</fc>  %bright% "
 
    -- general behavior
    , lowerOnStart =     True    -- send to bottom of window stack on start
@@ -40,14 +40,14 @@ Config {
 
         -- weather monitor
         [ Run Weather "RPLL" [ "--template"
-                             , "<fc=#83a598> <stationState><skyCondition> <tempC>°C</fc>"
+                             , "<fc=#83a598>  <stationState><skyCondition> <tempC>°C</fc>"
                              ] 36000
 
         -- StdinReader
         , Run StdinReader
 
         -- cpu activity monitor
-        , Run MultiCpu       [ "--template" , "<fc=#b16286> <total0>% <total1>% <total2>% <total3>% <total4>% <total5>% <total6>% <total7>% <total8>% <total9>% <total10>% <total11>%</fc>"
+        , Run MultiCpu       [ "--template" , "<fc=#b16286> CPU <total0>% <total1>% <total2>% <total3>% <total4>% <total5>% <total6>% <total7>% <total8>% <total9>% <total10>% <total11>%</fc>"
                              , "--Low"      , "50"         -- units: %
                              , "--High"     , "85"         -- units: %
                              , "--high"     , "#fb4934"
@@ -63,7 +63,7 @@ Config {
                              ] 50
 
         -- memory usage monitor
-        , Run Memory         [ "--template" ,"<fc=#458588> <usedratio>%</fc>"
+        , Run Memory         [ "--template" ,"<fc=#458588> RAM <usedratio>%</fc>"
                              , "--Low"      , "20"        -- units: %
                              , "--High"     , "90"        -- units: %
                              , "--high"     , "#fb4934"
@@ -76,16 +76,16 @@ Config {
 
                              , "--" -- battery specific options
                                        -- discharging status
-                                       , "-o"	, " <left>%"
+                                       , "-o"	, " <left>%"
                                        -- AC "on" status
-                                       , "-O"	, "<fc=#fbf1c7> <left>%</fc>"
+                                       , "-O"	, " <left>%"
                                        -- charged status
-                                       , "-i"	, "<fc=#fbf1c7> <left>%</fc>"
+                                       , "-i"	, " <left>%"
                              ] 50
 
         -- Value reference:
         -- https://hackage.haskell.org/package/parsedate-2006.11.10/docs/System-Time-Parse.html
-        , Run Date           "<fc=#d3869b> %m/%d/%Y %a  %I:%M %p</fc>" "date" 10
+        , Run Date           "<fc=#d3869b> %m/%d/%Y %a  %I:%M %p</fc>" "date" 10
 
         -- keyboard layout indicator
         , Run Kbd            [ ("us(dvorak)" , "<fc=#00008B>DV</fc>")
@@ -96,6 +96,6 @@ Config {
         , Run Com "uname" ["-s", "-r"] "uname" 0
         -- volume
         , Run Com "/bin/bash" ["-c", "~/.xmonad/get-volume.sh"] "volume" 1
-        , Run Brightness ["--template", "<fc=#fabd2f> <percent></fc>", "--", "-D", "intel_backlight"] 10
+        , Run Brightness ["--template", "<fc=#fabd2f> <percent></fc>", "--", "-D", "intel_backlight"] 10
         ]
    }
