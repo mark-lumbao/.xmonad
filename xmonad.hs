@@ -108,6 +108,8 @@ myKeys =
   , ("<F1>", spawn $ myBacklitCtl ++ " s 1%")
   , ("<F2>", spawn $ myBacklitCtl ++ " s 10%-")
   , ("<F3>", spawn $ myBacklitCtl ++ " s 10%+")
+  -- MSI keyboard backlit control
+  , ("<F4>", spawn "~/.config/mybin/dm_msi_opt")
   ]
 
 -- Autostarts startup :: X ()
